@@ -26,10 +26,24 @@ public class FetchExternalClientRunnerConfiguration {
     }
 
     @Bean
-    @ConditionalOnProperty(prefix = "app.config", name = "executor", havingValue = "fixed", matchIfMissing = true)
+    @ConditionalOnProperty(prefix = "app.config", name = "executor", havingValue = "stealing", matchIfMissing = true)
     public ExecutorService workStealingPool() {
         log.info("Initialization of WorkStealingPool: threads={}, availableCPUs={}", threads, Runtime.getRuntime().availableProcessors());
-        return Executors.newWorkStealingPool();
+        return Executors.newWorkStealingPool(threads);
+    }
+
+    @Bean
+    @ConditionalOnProperty(prefix = "app.config", name = "executor", havingValue = "fixed")
+    public ExecutorService fixedThreadPool() {
+        log.info("Initialization of FixedThreadPool: availableCPUs={}", Runtime.getRuntime().availableProcessors());
+        return Executors.newFixedThreadPool(threads);
+    }
+
+    @Bean
+    @ConditionalOnProperty(prefix = "app.config", name = "executor", havingValue = "cached")
+    public ExecutorService cachedThreadPool() {
+        log.info("Initialization of VirtualThreadPerTaskExecutor: availableCPUs={}", Runtime.getRuntime().availableProcessors());
+        return Executors.newCachedThreadPool();
     }
 
     @Bean
