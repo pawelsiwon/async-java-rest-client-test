@@ -20,7 +20,7 @@ func main() {
 	app := &application{}
 
 	flag.StringVar(&app.config.Addr, "addr", ":4000", "Address of service")
-	flag.DurationVar(&app.config.Timeout, "t", 1*time.Second, "Default timeout for connections")
+	flag.DurationVar(&app.config.Timeout, "t", 0, "Timeout for connection, default is 0 which means random time from 0s to 20s")
 	flag.Parse()
 
 	srv := http.Server{
