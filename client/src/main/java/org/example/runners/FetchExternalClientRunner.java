@@ -10,33 +10,36 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.Callable;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
+import java.util.function.Supplier;
 import java.util.stream.IntStream;
 
 @Slf4j
 public record FetchExternalClientRunner(ExecutorService executorService, ExternalServiceClient externalServiceClient, Integer howManyRequests) implements ApplicationRunner {
 
     @Override
-    public void run(ApplicationArguments args) throws Exception {
+    public void run(ApplicationArguments args) {
         Instant started = Instant.now();
 
+        List<Integer> results = Collections.synchronizedList(new ArrayList<>());
         var futures = IntStream.range(0, howManyRequests)
                 .mapToObj(this::createTask)
-                .map(executorService::submit)
+                .map(task -> CompletableFuture.supplyAsync(task, executorService))
+                .map(task -> task.thenAccept(results::add))
                 .toList();
 
-        List<Integer> results = new ArrayList<>(futures.size());
-        for(var f : futures) {
-            results.add(f.get());
+        for (var f : futures) {
+            f.join();
         }
 
         log.info("results [ {} ]", results);
         log.info("Execution time: {}", Duration.between(started, Instant.now()).get(ChronoUnit.SECONDS));
     }
 
-    private Callable<Integer> createTask(Integer i) {
+    private Supplier<Integer> createTask(Integer i) {
         log.info("Created task of {}", i);
         var created = Instant.now();
 
@@ -47,7 +50,7 @@ public record FetchExternalClientRunner(ExecutorService executorService, Externa
             var status = externalServiceClient.getServiceStatus();
             var finished = Instant.now();
 
-            log.info("Finished execution of status={}, id={}, idle={}, execution={}", status, i,
+            log.info("Finished execution of status={}, id={}, idle={}s, execution={}s", status, i,
                     Duration.between(created, started).getSeconds(),
                     Duration.between(started, finished).getSeconds());
 
