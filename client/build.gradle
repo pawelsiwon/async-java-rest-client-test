@@ -12,6 +12,14 @@ repositories {
     mavenCentral()
 }
 
+tasks.withType(JavaCompile).each {
+    it.options.compilerArgs.add('--enable-preview')
+}
+
+bootRun {
+    jvmArgs = ["--enable-preview", "-XX:ActiveProcessorCount=2"]
+}
+
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter'
 
