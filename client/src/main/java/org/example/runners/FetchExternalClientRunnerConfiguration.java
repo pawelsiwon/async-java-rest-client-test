@@ -3,6 +3,7 @@ package org.example.runners;
 import lombok.extern.slf4j.Slf4j;
 import org.example.clients.ExternalServiceClient;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -25,8 +26,16 @@ public class FetchExternalClientRunnerConfiguration {
     }
 
     @Bean
-    public ExecutorService executor() {
-        log.info("Initialization of ExecutorService: threads={}, available={}", threads, Runtime.getRuntime().availableProcessors());
-        return Executors.newWorkStealingPool(threads);
+    @ConditionalOnProperty(prefix = "app.config", name = "executor", havingValue = "fixed", matchIfMissing = true)
+    public ExecutorService workStealingPool() {
+        log.info("Initialization of WorkStealingPool: threads={}, availableCPUs={}", threads, Runtime.getRuntime().availableProcessors());
+        return Executors.newWorkStealingPool();
+    }
+
+    @Bean
+    @ConditionalOnProperty(prefix = "app.config", name = "executor", havingValue = "virtual")
+    public ExecutorService virtualThreadExecutor() {
+        log.info("Initialization of VirtualThreadPerTaskExecutor: availableCPUs={}", Runtime.getRuntime().availableProcessors());
+        return Executors.newVirtualThreadPerTaskExecutor();
     }
 }
