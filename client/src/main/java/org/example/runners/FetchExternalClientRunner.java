@@ -47,7 +47,7 @@ public record FetchExternalClientRunner(ExecutorService executorService, Externa
             var status = externalServiceClient.getServiceStatus();
             var finished = Instant.now();
 
-            log.info("Finished execution of status={}, id={}, idle={}, execution={}", i, status,
+            log.info("Finished execution of status={}, id={}, idle={}, execution={}", status, i,
                     Duration.between(created, started).getSeconds(),
                     Duration.between(started, finished).getSeconds());
 
