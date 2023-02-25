@@ -48,7 +48,11 @@ func (app *application) route() http.HandlerFunc {
 		n := counter.Add(1)
 		log.Printf("Started processing data %d", n)
 
-		time.Sleep(time.Duration(rand.Intn(21)) * time.Second)
+		if app.config.Timeout != 0 {
+			time.Sleep(app.config.Timeout)
+		} else {
+			time.Sleep(time.Duration(rand.Intn(21)) * time.Second)
+		}
 
 		w.Write([]byte(`{"status": "OK"}`))
 
