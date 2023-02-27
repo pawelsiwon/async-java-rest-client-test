@@ -7,6 +7,9 @@ import (
 	"net/http"
 	"sync/atomic"
 	"time"
+
+	"net/http/pprof"
+	_ "net/http/pprof"
 )
 
 type application struct {
@@ -28,6 +31,7 @@ func main() {
 		Addr:    app.config.Addr,
 	}
 
+	log.Printf("Starting server at %v...\n", app.config.Addr)
 	if err := srv.ListenAndServe(); err != nil {
 		log.Panic(err)
 	}
@@ -36,7 +40,8 @@ func main() {
 func (app *application) handler() http.Handler {
 	mux := http.NewServeMux()
 
-	mux.Handle("/", app.route())
+	mux.Handle("/data", app.route())
+	mux.HandleFunc("/debug", pprof.Profile)
 
 	return mux
 }
