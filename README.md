@@ -2,7 +2,8 @@
 
 ## Requirements
 
-Installed golang 1.20 
+Installed golang 1.20  
+
 JDK 19 for testing virtual threads (gradle toolchain should download it automatically)
 
 ## How to run
