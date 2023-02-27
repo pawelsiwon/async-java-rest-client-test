@@ -10,7 +10,7 @@ JDK 19 for testing virtual threads (gradle toolchain should download it automati
 
 Inside external-service folder run `make run` it should compile and run a dummy external service server  
 
-Inside client run ./gradlew :bootRun
+Inside client run `./gradlew :bootRun`
 
 ## How to play
 
